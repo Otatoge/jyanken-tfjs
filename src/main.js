@@ -43,13 +43,15 @@ import * as hand from '@tensorflow-models/hand-pose-detection'
         ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         detector.estimateHands(video, { flipHorizontal: false }).then((hands) => {
             if (typeof hands[0] !== 'object') return
+            let xlist = {}
             let ylist = {}
             hands[0].keypoints.forEach((keyp) => {
                 if (!keyp.name) return
+                xlist[keyp.name] = keyp.x
                 ylist[keyp.name] = keyp.y
             });
             const upFinger = [
-                ylist.thumb_ip ? (ylist.thumb_ip > ylist.thumb_tip ?? 0) : false,
+                xlist.thumb_ip ? (xlist.thumb_ip < xlist.thumb_tip ?? 0) : false,
                 ylist.index_finger_pip ? (ylist.index_finger_pip > ylist.index_finger_tip ?? 0) : false,
                 ylist.middle_finger_pip ? (ylist.middle_finger_pip > ylist.middle_finger_tip ?? 0) : false,
                 ylist.ring_finger_pip ? (ylist.ring_finger_pip > ylist.ring_finger_tip ?? 0) : false,
@@ -57,13 +59,10 @@ import * as hand from '@tensorflow-models/hand-pose-detection'
             ]
             if (!upFinger.slice(1).includes(false)) {
                 ctx.drawImage(choki, 0, 0);
-                console.log(0)
             } else if (upFinger[1] && upFinger[2]) {
                 ctx.drawImage(gu, 0, 0);
-                console.log(1)
             } else if (!upFinger.slice(1).includes(true)) {
                 ctx.drawImage(pa, 0, 0);
-                console.log(2)
             }
         }).catch(alert);
         requestAnimationFrame(run);
